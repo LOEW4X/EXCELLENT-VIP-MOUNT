@@ -82,7 +82,7 @@ TeleportTab:CreateToggle({
                             plr.Character:PivotTo(point)
                         end
                     end)
-                    task.wait(5) -- delay diganti menjadi 5 detik
+                    task.wait(3) -- delay diganti menjadi 5 detik
                 end
             end
         end)
@@ -387,7 +387,7 @@ PlayerTab:CreateButton({
 
 -- Fly Toggle
 PlayerTab:CreateToggle({
-    Name = "Fly",
+    Name = "Fly (PC ONLY)",
     CurrentValue = false,
     Callback = function(Value)
         setFly(Value)
