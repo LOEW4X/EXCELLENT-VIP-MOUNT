@@ -87,6 +87,45 @@ TeleportTab:CreateToggle({
     end,
 })
 
+-- =========================
+-- Teleport Mount Lawak (Auto)
+local LawakEnabled = false
+local LawakPoints = {
+    CFrame.new(-204, 35, -279),   -- Basecamp
+    CFrame.new(-250, 31, -16),    -- Checkpoint 1
+    CFrame.new(-194, 178, 245),   -- Checkpoint 2
+    CFrame.new(283, 322, -191),   -- Checkpoint 3
+    CFrame.new(324, 404, 132),    -- Checkpoint 4
+    CFrame.new(451, 391, -72),    -- Checkpoint 5
+    CFrame.new(530, 569, -313),   -- Checkpoint 6
+    CFrame.new(1441, 1128, -1300),-- Checkpoint 7
+    CFrame.new(1794, 1478, -1963),-- Checkpoint 8
+    CFrame.new(2832, 2623, -1849) -- Puncak
+}
+
+TeleportTab:CreateToggle({
+    Name = "Mount Lawak",
+    CurrentValue = false,
+    Flag = "MountLawakTP",
+    Callback = function(Value)
+        LawakEnabled = Value
+        task.spawn(function()
+            while LawakEnabled do
+                for _, point in ipairs(LawakPoints) do
+                    if not LawakEnabled then break end
+                    pcall(function()
+                        local plr = game.Players.LocalPlayer
+                        if plr and plr.Character then
+                            plr.Character:PivotTo(point)
+                        end
+                    end)
+                    task.wait(1) -- delay antar titik 5 detik
+                end
+            end
+        end)
+    end,
+})
+
 -- Player features state & helpers
 local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
