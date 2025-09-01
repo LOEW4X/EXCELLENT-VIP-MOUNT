@@ -100,7 +100,9 @@ local STATE = {
     InfiniteJump = false,
     Fly = false,
     SpeedDesired = nil,
-    SpeedApplied = false
+    SpeedApplied = false,
+    HideNick = false,
+    OriginalNick = nil
 }
 
 -- store connections so toggles stay persistent
@@ -109,6 +111,22 @@ local function disconnectAll(tbl)
     for i, con in pairs(tbl) do
         pcall(function() con:Disconnect() end)
         tbl[i] = nil
+    end
+end
+
+local NamaDepan = {"Andi","Budi","Rizky","Dewi","Siti","Putra","Fajar","Dian","Agus","Citra"}
+local NamaBelakang = {"Saputra","Santoso","Pratama","Wibowo","Kurniawan","Wijaya","Hidayat","Puspita","Utami","Anggraini"}
+
+local function generateNama()
+    local depan = NamaDepan[math.random(1,#NamaDepan)]
+    local belakang = NamaBelakang[math.random(1,#NamaBelakang)]
+    return depan.." "..belakang
+end
+
+local function setNickname(name)
+    local lp = Players.LocalPlayer
+    if lp then
+        pcall(function() lp.DisplayName = name end) -- ganti DisplayName (yang kelihatan di game)
     end
 end
 
@@ -335,6 +353,24 @@ local function setFly(on)
     end
 end
 
+local function setHideNickname(on)
+    if on then
+        if not HideNick then
+            OriginalNick = Players.LocalPlayer.DisplayName
+            local newName = generateNama()
+            setNickname(newName)
+            notifyBottomRight("Hide Nickname aktif → "..newName, 3)
+            HideNick = true
+        end
+    else
+        if HideNick and OriginalNick then
+            setNickname(OriginalNick)
+            notifyBottomRight("Hide Nickname non-aktif → "..OriginalNick, 3)
+            HideNick = false
+        end
+    end
+end
+
 -- Anti-AFK (unchanged)
 PlayerTab:CreateButton({
     Name = "Anti AFK",
@@ -419,6 +455,15 @@ PlayerTab:CreateToggle({
             game:GetService("Lighting").GlobalShadows = true
             notifyBottomRight("Full Bright non-aktif", 2)
         end
+    end,
+})
+
+-- Hide Nickname Toggle
+PlayerTab:CreateToggle({
+    Name = "Hide Nickname",
+    CurrentValue = false,
+    Callback = function(Value)
+        setHideNickname(Value)
     end,
 })
 
