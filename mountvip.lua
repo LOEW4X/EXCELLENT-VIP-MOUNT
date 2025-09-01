@@ -1,108 +1,185 @@
--- Rayfield UI Loader
+--// EXCELLENT VIP SCRIPT (Mount Bohong Edition)
+--// UI Library by Rayfield
+
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
--- Window
 local Window = Rayfield:CreateWindow({
-    Name = "Excellent Mount Vip",
-    LoadingTitle = "EXCELLENT",
-    LoadingSubtitle = "by LOEW4X",
-    ConfigurationSaving = {
-        Enabled = false,
-    }
+   Name = "EXCELLENT MOUNT VIP",
+   LoadingTitle = "EXCELLENT VIP",
+   LoadingSubtitle = "By LOEW4X",
+   ConfigurationSaving = {
+      Enabled = true,
+      FolderName = "EXCELLENTVIP",
+      FileName = "Config"
+   },
+   Discord = {
+      Enabled = false,
+   },
+   KeySystem = false,
 })
 
--- Tabs
+---------------------------------------------------------------------
+-- TELEPORT TAB
+---------------------------------------------------------------------
 local TeleportTab = Window:CreateTab("Teleport", 4483362458)
-local PlayerTab = Window:CreateTab("Players", 4483362458)
 
--- Auto Teleport (Mount Bohong)
-local TeleportEnabled = false
-local TeleportPoints = {
-    CFrame.new(918, 56, 143),   -- Basecamp
-    CFrame.new(1158, 165, -453),
-    CFrame.new(927, 274, -1016),
-    CFrame.new(590, 662, -896),
-    CFrame.new(43, 808, -1009),
-    CFrame.new(-34, 905, -1141),
-    CFrame.new(-690, 889, -1381),
-    CFrame.new(-652, 898, -1776),
-    CFrame.new(-1196, 994, -1740),
-    CFrame.new(-1335, 898, -1158),
-    CFrame.new(-975, 1309, -1469) -- Puncak
-}
-
-TeleportTab:CreateToggle({
-    Name = "Mount Bohong",
-    CurrentValue = false,
-    Flag = "MountBohongTP",
-    Callback = function(Value)
-        TeleportEnabled = Value
-        task.spawn(function()
-            while TeleportEnabled do
-                for _, point in ipairs(TeleportPoints) do
-                    if not TeleportEnabled then break end
-                    game.Players.LocalPlayer.Character:PivotTo(point)
-                    task.wait(1)
-                end
-            end
-        end)
-    end,
+local MountToggle = TeleportTab:CreateToggle({
+   Name = "Mount Bohong",
+   CurrentValue = false,
+   Flag = "MountBohong",
+   Callback = function(Value)
+       getgenv().AutoMount = Value
+       if Value then
+           task.spawn(function()
+               while getgenv().AutoMount do
+                   local char = game.Players.LocalPlayer.Character
+                   if char and char:FindFirstChild("HumanoidRootPart") then
+                       local points = {
+                           CFrame.new(918, 56, 143),
+                           CFrame.new(1158, 165, -453),
+                           CFrame.new(927, 274, -1016),
+                           CFrame.new(590, 662, -896),
+                           CFrame.new(43, 808, -1009),
+                           CFrame.new(-34, 905, -1141),
+                           CFrame.new(-690, 889, -1381),
+                           CFrame.new(-652, 898, -1776),
+                           CFrame.new(-1196, 994, -1740),
+                           CFrame.new(-1335, 898, -1158),
+                           CFrame.new(-975, 1309, -1469),
+                       }
+                       for _, point in ipairs(points) do
+                           if not getgenv().AutoMount then break end
+                           char:PivotTo(point)
+                           task.wait(5) -- delay 5 detik antar teleport
+                       end
+                   end
+               end
+           end)
+       end
+   end,
 })
 
--- Player Features
-PlayerTab:CreateToggle({
-    Name = "Godmode",
-    CurrentValue = false,
-    Callback = function(Value)
-        if Value then
-            local char = game.Players.LocalPlayer.Character
-            if char then
-                for _,v in pairs(char:GetDescendants()) do
-                    if v:IsA("Humanoid") then
-                        v.Name = "GodHumanoid"
-                        v.MaxHealth = math.huge
-                        v.Health = math.huge
-                    end
-                end
-            end
-        end
-    end,
+---------------------------------------------------------------------
+-- PLAYERS TAB
+---------------------------------------------------------------------
+local PlayersTab = Window:CreateTab("Players", 4483362458)
+
+-- GODMODE
+PlayersTab:CreateToggle({
+   Name = "Godmode",
+   CurrentValue = false,
+   Flag = "Godmode",
+   Callback = function(Value)
+       local player = game.Players.LocalPlayer
+       if Value then
+           getgenv().GodConn = player.CharacterAdded:Connect(function(char)
+               task.wait(1)
+               if char:FindFirstChild("Humanoid") then
+                   char.Humanoid.Name = "GodHumanoid"
+               end
+           end)
+           if player.Character and player.Character:FindFirstChild("Humanoid") then
+               player.Character.Humanoid.Name = "GodHumanoid"
+           end
+       else
+           if getgenv().GodConn then getgenv().GodConn:Disconnect() end
+           if player.Character and player.Character:FindFirstChild("GodHumanoid") then
+               player.Character.GodHumanoid.Name = "Humanoid"
+           end
+       end
+   end,
 })
 
-PlayerTab:CreateInput({
-    Name = "Speedhack (16–150)",
-    PlaceholderText = "Enter WalkSpeed",
-    RemoveTextAfterFocusLost = true,
-    Callback = function(Text)
-        local speed = tonumber(Text)
-        if speed and speed >= 16 and speed <= 150 then
-            game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = speed
-        end
-    end,
+-- INFINITE JUMP
+PlayersTab:CreateToggle({
+   Name = "Infinite Jump",
+   CurrentValue = false,
+   Flag = "InfiniteJump",
+   Callback = function(Value)
+       getgenv().InfJump = Value
+   end,
+})
+game:GetService("UserInputService").JumpRequest:Connect(function()
+   if getgenv().InfJump and game.Players.LocalPlayer.Character then
+       game.Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid"):ChangeState("Jumping")
+   end
+end)
+
+-- SPEEDHACK
+local speedValue = 16
+PlayersTab:CreateInput({
+   Name = "WalkSpeed",
+   PlaceholderText = "16 - 150",
+   RemoveTextAfterFocusLost = true,
+   Callback = function(Text)
+       local num = tonumber(Text)
+       if num and num >= 16 and num <= 150 then
+           speedValue = num
+       end
+   end,
+})
+PlayersTab:CreateButton({
+   Name = "Apply SpeedHack",
+   Callback = function()
+       local hum = game.Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+       if hum then
+           hum.WalkSpeed = speedValue
+       end
+   end,
 })
 
-PlayerTab:CreateToggle({
-    Name = "Fly",
-    CurrentValue = false,
-    Callback = function(Value)
-        -- simple fly
-        local plr = game.Players.LocalPlayer
-        local hum = plr.Character and plr.Character:FindFirstChildOfClass("Humanoid")
-        if hum then
-            if Value then
-                hum:ChangeState(Enum.HumanoidStateType.Physics)
-                plr.Character.HumanoidRootPart.Anchored = false
-                -- basic fly loop (hold space to go up, shift to go down)
-                task.spawn(function()
-                    while Value do
-                        local hrp = plr.Character:FindFirstChild("HumanoidRootPart")
-                        if hrp then
-                            if game.UserInputService:IsKeyDown(Enum.KeyCode.Space) then
-                                hrp.CFrame = hrp.CFrame + Vector3.new(0,1,0)
-                            elseif game.UserInputService:IsKeyDown(Enum.KeyCode.LeftShift) then
-                                hrp.CFrame = hrp.CFrame + Vector3.new(0,-1,0)
-                            end
-                        end
+-- FLY (Android support)
+PlayersTab:CreateButton({
+   Name = "Toggle Fly",
+   Callback = function()
+       getgenv().flying = not getgenv().flying
+       local player = game.Players.LocalPlayer
+       local char = player.Character or player.CharacterAdded:Wait()
+       local hum = char:WaitForChild("HumanoidRootPart")
+       local UIS = game:GetService("UserInputService")
+       local speed = 50
+       if getgenv().flying then
+           task.spawn(function()
+               while getgenv().flying do
+                   local move = Vector3.new()
+                   if UIS:IsKeyDown(Enum.KeyCode.W) then move = move + (workspace.CurrentCamera.CFrame.LookVector) end
+                   if UIS:IsKeyDown(Enum.KeyCode.S) then move = move - (workspace.CurrentCamera.CFrame.LookVector) end
+                   if UIS:IsKeyDown(Enum.KeyCode.A) then move = move - (workspace.CurrentCamera.CFrame.RightVector) end
+                   if UIS:IsKeyDown(Enum.KeyCode.D) then move = move + (workspace.CurrentCamera.CFrame.RightVector) end
+                   hum.Velocity = move * speed
+                   task.wait()
+               end
+               hum.Velocity = Vector3.zero
+           end)
+       end
+   end,
+})
+
+-- FULL BRIGHT
+PlayersTab:CreateToggle({
+   Name = "Full Bright",
+   CurrentValue = false,
+   Flag = "FullBright",
+   Callback = function(Value)
+       if Value then
+           game.Lighting.Brightness = 2
+           game.Lighting.ClockTime = 14
+           game.Lighting.FogEnd = 100000
+       else
+           game.Lighting.Brightness = 1
+           game.Lighting.ClockTime = 0
+           game.Lighting.FogEnd = 1000
+       end
+   end,
+})
+
+-- ANTI AFK
+local vu = game:GetService("VirtualUser")
+game.Players.LocalPlayer.Idled:Connect(function()
+   vu:Button2Down(Vector2.new(0,0),workspace.CurrentCamera.CFrame)
+   task.wait(1)
+   vu:Button2Up(Vector2.new(0,0),workspace.CurrentCamera.CFrame)
+end)
                         task.wait()
                     end
                 end)
