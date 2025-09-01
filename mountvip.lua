@@ -1,6 +1,4 @@
--- EXCELLENT VIP MOUNT (modified)
--- by LOEW4X (modified to add Apply Speedhack, persistent Godmode & Infinite Jump,
--- Android-compatible Fly UI, and bottom-right notifications)
+-- EXCELLENT VIP MOUNT
 
 -- Rayfield UI Loader
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
@@ -82,7 +80,7 @@ TeleportTab:CreateToggle({
                             plr.Character:PivotTo(point)
                         end
                     end)
-                    task.wait(1) -- delay diganti menjadi 5 detik
+                    task.wait(1)
                 end
             end
         end)
