@@ -95,6 +95,7 @@ local ContextActionService = game:GetService("ContextActionService")
 
 local STATE = {
     Godmode = false,
+    GodConnection = nil,
     InfiniteJump = false,
     Fly = false,
     SpeedDesired = nil,
@@ -484,5 +485,34 @@ Players.LocalPlayer.AncestryChanged:Connect(function()
     if enforcedSpeedConn then enforcedSpeedConn:Disconnect() enforcedSpeedConn = nil end
 end)
 
+local function setGodmode(on)
+    local player = game.Players.LocalPlayer
+    local char = player.Character or player.CharacterAdded:Wait()
+    local humanoid = char:FindFirstChildOfClass("Humanoid")
+
+    if humanoid then
+        if on then
+            if not Godmode then
+                Godmode = true
+                GodConnection = humanoid.HealthChanged:Connect(function()
+                    if humanoid and humanoid.Health < humanoid.MaxHealth then
+                        humanoid.Health = humanoid.MaxHealth
+                    end
+                end)
+                notifyBottomRight("Godmode aktif", 3)
+            end
+        else
+            if Godmode then
+                Godmode = false
+                if GodConnection then
+                    GodConnection:Disconnect()
+                    GodConnection = nil
+                end
+                notifyBottomRight("Godmode non-aktif", 3)
+            end
+        end
+    end
+end
+
 -- Initial notification
-notifyBottomRight("EXCELLENT VIP loaded — tekan Apply Speedhack setelah memilih speed", 4)
+notifyBottomRight("EXCELLENT VIP loaded", 4)
