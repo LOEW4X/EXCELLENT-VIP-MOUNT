@@ -63,7 +63,7 @@ local TeleportPoints = {
     CFrame.new(-652, 898, -1776),
     CFrame.new(-1196, 994, -1740),
     CFrame.new(-1335, 898, -1158),
-    CFrame.new(-975, 1309, -1469) -- Puncak
+    CFrame.new(-974, 1306, -1474) -- Puncak
 }
 
 TeleportTab:CreateToggle({
@@ -82,7 +82,7 @@ TeleportTab:CreateToggle({
                             plr.Character:PivotTo(point)
                         end
                     end)
-                    task.wait(3) -- delay diganti menjadi 5 detik
+                    task.wait(1) -- delay diganti menjadi 5 detik
                 end
             end
         end)
