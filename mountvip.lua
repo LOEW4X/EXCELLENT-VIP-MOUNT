@@ -92,7 +92,7 @@ TeleportTab:CreateToggle({
 local LawakEnabled = false
 local LawakPoints = {
     CFrame.new(-204, 35, -279),   -- Basecamp
-    CFrame.new(-250, 31, -16),    -- Checkpoint 1
+    CFrame.new(-250, 31, 16),    -- Checkpoint 1
     CFrame.new(-194, 178, 245),   -- Checkpoint 2
     CFrame.new(283, 322, -191),   -- Checkpoint 3
     CFrame.new(324, 404, 132),    -- Checkpoint 4
