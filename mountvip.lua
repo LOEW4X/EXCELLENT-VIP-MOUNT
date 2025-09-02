@@ -119,7 +119,7 @@ TeleportTab:CreateToggle({
                             plr.Character:PivotTo(point)
                         end
                     end)
-                    task.wait(1) -- delay antar titik 5 detik
+                    task.wait(2) -- delay antar titik 5 detik
                 end
             end
         end)
