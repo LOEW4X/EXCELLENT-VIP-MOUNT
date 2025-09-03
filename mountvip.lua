@@ -130,13 +130,13 @@ TeleportTab:CreateToggle({
 local TeleportEnabled_Hilih = false
 local TeleportPoints_Hilih = {
     CFrame.new(-911, 23, -722),  -- Basecamp
-    CFrame.new(453, 16, -606),   -- Checkpoint 1
-    CFrame.new(-206, 48, -125),  -- Checkpoint 2
-    CFrame.new(-843, 34, -86),   -- Checkpoint 3
-    CFrame.new(-713, 401, 389),  -- Checkpoint 4
-    CFrame.new(-340, 150, 222),  -- Checkpoint 5
-    CFrame.new(-377, 362, 462),  -- Checkpoint 6
-    CFrame.new(-73, 336, 246),   -- Checkpoint 7
+    CFrame.new(448, 16, -608),   -- Checkpoint 1
+    CFrame.new(-209, 50, -125),  -- Checkpoint 2
+    CFrame.new(-840, 36, -82),   -- Checkpoint 3
+    CFrame.new(-713, 402, 394),  -- Checkpoint 4
+    CFrame.new(-341, 150, 216),  -- Checkpoint 5
+    CFrame.new(-371, 363, 463),  -- Checkpoint 6
+    CFrame.new(-70, 337, 241),   -- Checkpoint 7
     CFrame.new(245, 529, 172)    -- Puncak
 }
 
