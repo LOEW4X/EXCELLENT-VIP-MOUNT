@@ -896,12 +896,12 @@ UtilityTab:CreateSlider({
     end,
 })
 
--- === AUTO JUMP ===
+-- === AUTO JUMP / BUNNY HOP ===
 local autoJumpConn = nil
 local AUTO_JUMP = false
 
-UtilityTab:CreateToggle({
-    Name = "Auto Jump",
+PlayerTab:CreateToggle({
+    Name = "Auto Jump (Bunny Hop)",
     CurrentValue = false,
     Callback = function(Value)
         AUTO_JUMP = Value
@@ -910,10 +910,14 @@ UtilityTab:CreateToggle({
             autoJumpConn = game:GetService("RunService").Heartbeat:Connect(function()
                 local lp = game.Players.LocalPlayer
                 if lp.Character and lp.Character:FindFirstChildOfClass("Humanoid") then
-                    lp.Character:FindFirstChildOfClass("Humanoid"):ChangeState(Enum.HumanoidStateType.Jumping)
+                    local hum = lp.Character:FindFirstChildOfClass("Humanoid")
+                    if hum.FloorMaterial ~= Enum.Material.Air then
+                        -- kalau sudah nyentuh tanah → langsung lompat lagi
+                        hum:ChangeState(Enum.HumanoidStateType.Jumping)
+                    end
                 end
             end)
-            if notifyBottomRight then notifyBottomRight("Auto Jump aktif", 2) end
+            if notifyBottomRight then notifyBottomRight("Auto Jump aktif (Bunny Hop)", 2) end
         else
             if autoJumpConn then autoJumpConn:Disconnect() autoJumpConn = nil end
             if notifyBottomRight then notifyBottomRight("Auto Jump non-aktif", 2) end
