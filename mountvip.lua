@@ -500,7 +500,7 @@ PlayerTab:CreateToggle({
     end,
 })
 
--- Speedhack input + Apply button
+--apply speedhack
 PlayerTab:CreateInput({
     Name = "Speedhack (16–150)",
     PlaceholderText = "Enter WalkSpeed",
