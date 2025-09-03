@@ -887,7 +887,8 @@ UtilityTab:CreateSlider({
         XRAY_TRANSPARENCY = Value
         if XRAY_ENABLED then
             for _, obj in ipairs(workspace:GetDescendants()) do
-                if obj:IsA("BasePart") and not obj:IsDescendantOf(game.Players.LocalPlayer.Character) then
+                if (obj:IsA("BasePart") or obj:IsA("MeshPart") or obj:IsA("UnionOperation")) 
+                   and not obj:IsDescendantOf(game.Players.LocalPlayer.Character) then
                     obj.LocalTransparencyModifier = XRAY_TRANSPARENCY
                 end
             end
@@ -924,13 +925,18 @@ UtilityTab:CreateToggle({
 local cam = workspace.CurrentCamera
 local defaultFOV = cam.FieldOfView
 
-UtilityTab:CreateSlider({
+UtilityTab:CreateInput({
     Name = "Camera FOV",
-    Range = {50, 120}, -- normal 70, makin besar makin wide
-    Increment = 1,
-    CurrentValue = defaultFOV,
-    Callback = function(Value)
-        cam.FieldOfView = Value
+    PlaceholderText = "Masukkan angka 50-120",
+    RemoveTextAfterFocusLost = true,
+    Callback = function(Text)
+        local num = tonumber(Text)
+        if num and num >= 50 and num <= 120 then
+            workspace.CurrentCamera.FieldOfView = num
+            if notifyBottomRight then notifyBottomRight("FOV diset ke " .. num, 2) end
+        else
+            if notifyBottomRight then notifyBottomRight("Masukkan angka 50–120", 3) end
+        end
     end,
 })
 
@@ -945,11 +951,11 @@ PlayerTab:CreateButton({
     end,
 })
 
--- === TELEPORT TO PLAYER ===
-PlayerTab:CreateDropdown({
+-- Dropdown Teleport Player
+local tpDropdown = PlayerTab:CreateDropdown({
     Name = "Teleport to Player",
-    Options = {}, -- diisi nanti
-    CurrentOption = nil,
+    Options = {},
+    CurrentOption = {},
     Flag = "TPToPlayer",
     Callback = function(Option)
         local targetName = Option[1]
@@ -957,15 +963,15 @@ PlayerTab:CreateDropdown({
         local target = game.Players:FindFirstChild(targetName)
         if target and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
             if lp.Character and lp.Character:FindFirstChild("HumanoidRootPart") then
-                lp.Character:FindFirstChild("HumanoidRootPart").CFrame =
-                    target.Character:FindFirstChild("HumanoidRootPart").CFrame + Vector3.new(0,3,0)
+                lp.Character.HumanoidRootPart.CFrame =
+                    target.Character.HumanoidRootPart.CFrame + Vector3.new(0,3,0)
                 if notifyBottomRight then notifyBottomRight("Teleport ke " .. targetName, 2) end
             end
         end
     end,
 })
 
--- updater untuk isi dropdown player
+-- updater isi player
 task.spawn(function()
     while task.wait(3) do
         local options = {}
@@ -974,10 +980,7 @@ task.spawn(function()
                 table.insert(options, p.Name)
             end
         end
-        local dropdown = Rayfield.Flags["TPToPlayer"]
-        if dropdown then
-            dropdown:Set(options)
-        end
+        tpDropdown:Set(options)
     end
 end)
 
