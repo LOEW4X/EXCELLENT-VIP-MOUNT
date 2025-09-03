@@ -14,6 +14,7 @@ local Window = Rayfield:CreateWindow({
 -- Tabs
 local TeleportTab = Window:CreateTab("Teleport", 4483362458)
 local PlayerTab = Window:CreateTab("Players", 4483362458)
+local UtilityTab = Window:CreateTab("Utility", 4483362458)
 local PerformanceTab = Window:CreateTab("Performance", 4483362458)
 local WeatherTab = Window:CreateTab("Weather", 4483362458)
 
@@ -799,7 +800,7 @@ PlayerTab:CreateButton({
 })
 
 -- Fly Toggle
-PlayerTab:CreateToggle({
+UtilityTab:CreateToggle({
     Name = "Fly (PC ONLY)",
     CurrentValue = false,
     Callback = function(Value)
@@ -808,7 +809,7 @@ PlayerTab:CreateToggle({
 })
 
 -- Infinite Jump Toggle (persistent)
-PlayerTab:CreateToggle({
+UtilityTab:CreateToggle({
     Name = "Infinite Jump",
     CurrentValue = false,
     Callback = function(Value)
@@ -817,7 +818,7 @@ PlayerTab:CreateToggle({
 })
 
 --full bright
-PlayerTab:CreateToggle({
+UtilityTab:CreateToggle({
     Name = "Full Bright",
     CurrentValue = false,
     Callback = function(Value)
@@ -854,7 +855,7 @@ PlayerTab:CreateToggle({
 local XRAY_TRANSPARENCY = 0.5
 local XRAY_ENABLED = false
 
-PlayerTab:CreateToggle({
+UtilityTab:CreateToggle({
     Name = "X-Ray",
     CurrentValue = false,
     Callback = function(Value)
@@ -877,7 +878,7 @@ PlayerTab:CreateToggle({
     end,
 })
 
-PlayerTab:CreateSlider({
+UtilityTab:CreateSlider({
     Name = "X-Ray Transparency",
     Range = {0.1, 1}, -- 0.1 = nyaris solid, 1 = full hilang
     Increment = 0.1,
