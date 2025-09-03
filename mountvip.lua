@@ -182,6 +182,7 @@ local STATE = {
     GodConnection = nil,
     InfiniteJump = false,
     Fly = false,
+    NormalWalkSpeed = 16,
     SpeedDesired = nil,
     SpeedApplied = false,
     HideNick = false,
@@ -294,34 +295,56 @@ local function setInfiniteJump(on)
     end
 end
 
--- Speedhack: input -> set desired value, Apply button enforces it until turned off
-local enforcedSpeedConn = nil
+-- apply speedhack
 local function applySpeed()
     if not STATE.SpeedDesired then
         notifyBottomRight("Masukkan nilai WalkSpeed sebelum apply", 3)
         return
     end
+
     STATE.SpeedApplied = true
-    -- disconnect old
+
+    local plr = Players.LocalPlayer
+    local humanoid = plr.Character and plr.Character:FindFirstChildOfClass("Humanoid")
+
+    -- simpan WalkSpeed asli (sekali saja, biar bisa direset)
+    if humanoid and not STATE.NormalWalkSpeed then
+        STATE.NormalWalkSpeed = humanoid.WalkSpeed
+    end
+
+    -- disconnect Heartbeat lama kalau ada
     if enforcedSpeedConn then enforcedSpeedConn:Disconnect() enforcedSpeedConn = nil end
-    -- enforce every frame (more robust than single set)
+
+    -- enforce setiap frame
     enforcedSpeedConn = RunService.Heartbeat:Connect(function()
         local plr = Players.LocalPlayer
-        if plr and plr.Character and plr.Character:FindFirstChildOfClass("Humanoid") then
-            pcall(function()
-                plr.Character:FindFirstChildOfClass("Humanoid").WalkSpeed = STATE.SpeedDesired
-            end)
+        local hum = plr.Character and plr.Character:FindFirstChildOfClass("Humanoid")
+        if hum and STATE.SpeedApplied then
+            hum.WalkSpeed = STATE.SpeedDesired
         end
     end)
+
     connections._speedEnf = enforcedSpeedConn
     notifyBottomRight("Speedhack diterapkan: " .. tostring(STATE.SpeedDesired), 2)
 end
 
+-- Perbaikan removeSpeedEnforce
 local function removeSpeedEnforce()
+    local plr = game.Players.LocalPlayer
+    local humanoid = plr.Character and plr.Character:FindFirstChildOfClass("Humanoid")
+
     STATE.SpeedApplied = false
+
+    -- disconnect semua koneksi lama
     if enforcedSpeedConn then enforcedSpeedConn:Disconnect() enforcedSpeedConn = nil end
     if connections._speedEnf then connections._speedEnf:Disconnect() connections._speedEnf = nil end
-    notifyBottomRight("Speedhack dilepas", 2)
+
+    -- reset ke normal WalkSpeed
+    if humanoid then
+        humanoid.WalkSpeed = STATE.NormalWalkSpeed or 16
+    end
+
+    notifyBottomRight("Speedhack dinonaktifkan", 2)
 end
 
 -- Fly: improved and Android-compatible (on-screen buttons)
