@@ -734,6 +734,7 @@ local function setWeather(mode)
         rain.Parent = workspace.CurrentCamera
         currentRain = rain
     end
+end  -- <<< ini yang kurang
 
 -- Fungsi restore default bawaan server
 local function restoreDefaultWeather()
