@@ -15,6 +15,7 @@ local Window = Rayfield:CreateWindow({
 local TeleportTab = Window:CreateTab("Teleport", 4483362458)
 local PlayerTab = Window:CreateTab("Players", 4483362458)
 local PerformanceTab = Window:CreateTab("Performance", 4483362458)
+local WeatherTab = Window:CreateTab("Weather", 4483362458)
 
 -- Notification helper (bottom-right)
 local function notifyBottomRight(text, duration)
@@ -189,6 +190,7 @@ local NormalLighting = {
 
 local Lighting = game:GetService("Lighting")
 local Terrain = workspace:FindFirstChildOfClass("Terrain")
+local Lighting = game:GetService("Lighting")
 
 local STATE = {
     Godmode = false,
@@ -199,7 +201,8 @@ local STATE = {
     SpeedDesired = nil,
     SpeedApplied = false,
     HideNick = false,
-    OriginalNick = nil
+    OriginalNick = nil,
+    currentRain = nil
 }
 
 -- State & penyimpanan nilai asli agar bisa di-restore
@@ -213,6 +216,14 @@ local PerfState = {
         particles = {},           -- {inst=emitter/trail/smoke/fire, enabled/rate}
         meshFidelity = {},        -- {inst=MeshPart, rf=Enum.RenderFidelity}
     }
+}
+
+-- Simpan kondisi default lighting
+local DefaultLighting = {
+    ClockTime = Lighting.ClockTime,
+    Brightness = Lighting.Brightness,
+    Ambient = Lighting.Ambient,
+    OutdoorAmbient = Lighting.OutdoorAmbient
 }
 
 -- store connections so toggles stay persistent
@@ -681,6 +692,61 @@ local function removeFPSBooster()
     notifyBottomRight("FPS Booster dinonaktifkan", 2)
 end
 
+-- Fungsi set weather
+local function setWeather(mode)
+    -- hapus hujan lama
+    if currentRain then
+        currentRain:Destroy()
+        currentRain = nil
+    end
+
+    if mode == "Pagi" then
+        Lighting.ClockTime = 6
+        Lighting.Brightness = 2
+        Lighting.Ambient = Color3.fromRGB(200, 200, 200)
+        Lighting.OutdoorAmbient = Color3.fromRGB(200, 200, 200)
+
+    elseif mode == "Senja" then
+        Lighting.ClockTime = 18
+        Lighting.Brightness = 1.5
+        Lighting.Ambient = Color3.fromRGB(255, 170, 127)
+        Lighting.OutdoorAmbient = Color3.fromRGB(255, 170, 127)
+
+    elseif mode == "Malam" then
+        Lighting.ClockTime = 0
+        Lighting.Brightness = 0.5
+        Lighting.Ambient = Color3.fromRGB(80, 80, 120)
+        Lighting.OutdoorAmbient = Color3.fromRGB(80, 80, 120)
+
+    elseif mode == "Hujan" then
+        Lighting.ClockTime = 14
+        Lighting.Brightness = 1
+        Lighting.Ambient = Color3.fromRGB(100, 100, 100)
+        Lighting.OutdoorAmbient = Color3.fromRGB(100, 100, 100)
+
+        -- efek hujan
+        local rain = Instance.new("ParticleEmitter")
+        rain.Rate = 500
+        rain.Lifetime = NumberRange.new(2, 3)
+        rain.Speed = NumberRange.new(20, 30)
+        rain.Size = NumberSequence.new(0.2)
+        rain.Texture = "http://www.roblox.com/asset/?id=48340627"
+        rain.Parent = workspace.CurrentCamera
+        currentRain = rain
+    end
+
+-- Fungsi restore default bawaan server
+local function restoreDefaultWeather()
+    if currentRain then
+        currentRain:Destroy()
+        currentRain = nil
+    end
+    Lighting.ClockTime = DefaultLighting.ClockTime
+    Lighting.Brightness = DefaultLighting.Brightness
+    Lighting.Ambient = DefaultLighting.Ambient
+    Lighting.OutdoorAmbient = DefaultLighting.OutdoorAmbient
+    end    
+
 -- Anti-AFK (unchanged)
 PlayerTab:CreateButton({
     Name = "Anti AFK",
@@ -829,6 +895,25 @@ PerformanceTab:CreateButton({
         notifyBottomRight("Particles/Trails dimatikan (sekali). Gunakan toggle untuk restore.", 3)
     end,
 })
+
+-- Dropdown pilihan weather
+WeatherTab:CreateDropdown({
+    Name = "Pilih Cuaca",
+    Options = {"Pagi", "Senja", "Malam", "Hujan"},
+    CurrentOption = "Pagi",
+    Flag = "WeatherSelect",
+    Callback = function(Option)
+        setWeather(Option)
+    end,
+})
+
+-- Tombol restore default
+WeatherTab:CreateButton({
+    Name = "Restore Default",
+    Callback = function()
+        restoreDefaultWeather()
+    end,
+})    
 
 -- Bypass basic anti-teleport (keep HumanoidRootPart unanchored)
 task.spawn(function()
