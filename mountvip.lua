@@ -1,5 +1,56 @@
 -- EXCELLENT VIP MOUNT
 
+-- === ADVANCED ANTI-CHEAT DETECTOR ===
+task.spawn(function()
+    local suspicious = {}
+
+    -- Lokasi umum dev taruh anti-cheat
+    local checkServices = {
+        game:GetService("Players").LocalPlayer:WaitForChild("PlayerScripts"),
+        game:GetService("ReplicatedFirst"),
+        game:GetService("ReplicatedStorage"),
+        game:GetService("StarterPlayer"),
+    }
+
+    for _, container in ipairs(checkServices) do
+        for _, obj in ipairs(container:GetDescendants()) do
+            if obj:IsA("LocalScript") or obj:IsA("ModuleScript") then
+                local lowerName = obj.Name:lower()
+
+                -- Deteksi dari nama
+                if string.find(lowerName, "anti") or string.find(lowerName, "cheat") or string.find(lowerName, "hack") then
+                    table.insert(suspicious, "[NameMatch] " .. obj:GetFullName())
+                end
+
+                -- Deteksi script yang mencoba Kick / WalkSpeed
+                pcall(function()
+                    local source = obj.Source
+                    if source then
+                        if string.find(source:lower(), "kick") then
+                            table.insert(suspicious, "[KickCheck] " .. obj:GetFullName())
+                        end
+                        if string.find(source:lower(), "walkspeed") or string.find(source:lower(), "jumppower") then
+                            table.insert(suspicious, "[SpeedCheck] " .. obj:GetFullName())
+                        end
+                    end
+                end)
+            end
+        end
+    end
+
+    if #suspicious > 0 then
+        if notifyBottomRight then
+            notifyBottomRight("⚠️ Detected possible Anti-Cheat:\n" .. table.concat(suspicious, "\n"), 6)
+        else
+            warn("⚠️ Anti-Cheat scripts detected:", table.concat(suspicious, ", "))
+        end
+    else
+        if notifyBottomRight then
+            notifyBottomRight("✅ Tidak terdeteksi anti-cheat mencurigakan", 3)
+        end
+    end
+end)
+
 -- Rayfield UI Loader
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
@@ -363,7 +414,7 @@ local function applySpeed()
     end)
 
     connections._speedEnf = enforcedSpeedConn
-    notifyBottomRight("Speedhack diterapkan: " .. tostring(STATE.SpeedDesired), 2)
+    notifyBottomRight("WalkSpeed On: " .. tostring(STATE.SpeedDesired), 2)
 end
 
 -- Perbaikan removeSpeedEnforce
@@ -382,7 +433,7 @@ local function removeSpeedEnforce()
         humanoid.WalkSpeed = STATE.NormalWalkSpeed or 16
     end
 
-    notifyBottomRight("Speedhack dinonaktifkan", 2)
+    notifyBottomRight("WalkSpeed Off", 2)
 end
 
 -- Fly: improved and Android-compatible (on-screen buttons)
@@ -774,22 +825,22 @@ PlayerTab:CreateToggle({
 
 --apply speedhack
 PlayerTab:CreateInput({
-    Name = "Speedhack (16–150)",
+    Name = "WalkSpeed (16–200)",
     PlaceholderText = "Enter WalkSpeed",
     RemoveTextAfterFocusLost = true,
     Callback = function(Text)
         local speed = tonumber(Text)
-        if speed and speed >= 16 and speed <= 150 then
+        if speed and speed >= 16 and speed <= 200 then
             STATE.SpeedDesired = speed
             notifyBottomRight("Speed yang dipilih: " .. tostring(speed), 2)
         else
-            notifyBottomRight("Masukkan nilai antara 16 sampai 150", 3)
+            notifyBottomRight("Masukkan nilai antara 16 sampai 200", 3)
         end
     end,
 })
 
 PlayerTab:CreateButton({
-    Name = "Apply Speedhack",
+    Name = "Apply WalkSpeed",
     Callback = function()
         if STATE.SpeedApplied then
             removeSpeedEnforce()
