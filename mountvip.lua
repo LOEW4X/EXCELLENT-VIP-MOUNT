@@ -177,6 +177,15 @@ local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
 local ContextActionService = game:GetService("ContextActionService")
 
+local NormalLighting = {
+    Brightness = game.Lighting.Brightness,
+    ClockTime = game.Lighting.ClockTime,
+    FogEnd = game.Lighting.FogEnd,
+    Ambient = game.Lighting.Ambient,
+    OutdoorAmbient = game.Lighting.OutdoorAmbient,
+    GlobalShadows = game.Lighting.GlobalShadows
+}
+
 local STATE = {
     Godmode = false,
     GodConnection = nil,
@@ -545,28 +554,34 @@ PlayerTab:CreateToggle({
     end,
 })
 
--- Full Bright Toggle (keeps previous minimal revert behavior)
+--full bright
 PlayerTab:CreateToggle({
     Name = "Full Bright",
     CurrentValue = false,
     Callback = function(Value)
         if Value then
-            game:GetService("Lighting").Brightness = 2
-            game:GetService("Lighting").ClockTime = 12
-            game:GetService("Lighting").FogEnd = 1e10
-            game:GetService("Lighting").GlobalShadows = false
-            game:GetService("Lighting").OutdoorAmbient = Color3.new(1,1,1)
-            notifyBottomRight("Full Bright aktif", 2)
+            -- Aktifkan Full Bright
+            game.Lighting.Brightness = 2
+            game.Lighting.ClockTime = 12
+            game.Lighting.FogEnd = 1e10
+            game.Lighting.Ambient = Color3.new(1,1,1)
+            game.Lighting.OutdoorAmbient = Color3.new(1,1,1)
+            game.Lighting.GlobalShadows = false
         else
-            game:GetService("Lighting").GlobalShadows = true
-            notifyBottomRight("Full Bright non-aktif", 2)
+            -- Balikin ke kondisi asli
+            game.Lighting.Brightness = NormalLighting.Brightness
+            game.Lighting.ClockTime = NormalLighting.ClockTime
+            game.Lighting.FogEnd = NormalLighting.FogEnd
+            game.Lighting.Ambient = NormalLighting.Ambient
+            game.Lighting.OutdoorAmbient = NormalLighting.OutdoorAmbient
+            game.Lighting.GlobalShadows = NormalLighting.GlobalShadows
         end
     end,
 })
 
 -- Hide Nickname Toggle
 PlayerTab:CreateToggle({
-    Name = "Hide Nickname",
+    Name = "Hide Nickname (Bug)",
     CurrentValue = false,
     Callback = function(Value)
         setHideNickname(Value)
