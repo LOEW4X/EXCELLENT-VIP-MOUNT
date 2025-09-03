@@ -895,6 +895,92 @@ UtilityTab:CreateSlider({
     end,
 })
 
+-- === AUTO JUMP ===
+local autoJumpConn = nil
+local AUTO_JUMP = false
+
+UtilityTab:CreateToggle({
+    Name = "Auto Jump",
+    CurrentValue = false,
+    Callback = function(Value)
+        AUTO_JUMP = Value
+        if AUTO_JUMP then
+            if autoJumpConn then autoJumpConn:Disconnect() end
+            autoJumpConn = game:GetService("RunService").Heartbeat:Connect(function()
+                local lp = game.Players.LocalPlayer
+                if lp.Character and lp.Character:FindFirstChildOfClass("Humanoid") then
+                    lp.Character:FindFirstChildOfClass("Humanoid"):ChangeState(Enum.HumanoidStateType.Jumping)
+                end
+            end)
+            if notifyBottomRight then notifyBottomRight("Auto Jump aktif", 2) end
+        else
+            if autoJumpConn then autoJumpConn:Disconnect() autoJumpConn = nil end
+            if notifyBottomRight then notifyBottomRight("Auto Jump non-aktif", 2) end
+        end
+    end,
+})
+
+-- === FOV SLIDER ===
+local cam = workspace.CurrentCamera
+local defaultFOV = cam.FieldOfView
+
+UtilityTab:CreateSlider({
+    Name = "Camera FOV",
+    Range = {50, 120}, -- normal 70, makin besar makin wide
+    Increment = 1,
+    CurrentValue = defaultFOV,
+    Callback = function(Value)
+        cam.FieldOfView = Value
+    end,
+})
+
+-- === REJOIN BUTTON ===
+PlayerTab:CreateButton({
+    Name = "Rejoin Server",
+    Callback = function()
+        local TeleportService = game:GetService("TeleportService")
+        local Players = game:GetService("Players")
+        local lp = Players.LocalPlayer
+        TeleportService:Teleport(game.PlaceId, lp)
+    end,
+})
+
+-- === TELEPORT TO PLAYER ===
+PlayerTab:CreateDropdown({
+    Name = "Teleport to Player",
+    Options = {}, -- diisi nanti
+    CurrentOption = nil,
+    Flag = "TPToPlayer",
+    Callback = function(Option)
+        local targetName = Option[1]
+        local lp = game.Players.LocalPlayer
+        local target = game.Players:FindFirstChild(targetName)
+        if target and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
+            if lp.Character and lp.Character:FindFirstChild("HumanoidRootPart") then
+                lp.Character:FindFirstChild("HumanoidRootPart").CFrame =
+                    target.Character:FindFirstChild("HumanoidRootPart").CFrame + Vector3.new(0,3,0)
+                if notifyBottomRight then notifyBottomRight("Teleport ke " .. targetName, 2) end
+            end
+        end
+    end,
+})
+
+-- updater untuk isi dropdown player
+task.spawn(function()
+    while task.wait(3) do
+        local options = {}
+        for _, p in ipairs(game.Players:GetPlayers()) do
+            if p ~= game.Players.LocalPlayer then
+                table.insert(options, p.Name)
+            end
+        end
+        local dropdown = Rayfield.Flags["TPToPlayer"]
+        if dropdown then
+            dropdown:Set(options)
+        end
+    end
+end)
+
 -- Toggle utama FPS Booster
 PerformanceTab:CreateToggle({
     Name = "FPS Booster",
