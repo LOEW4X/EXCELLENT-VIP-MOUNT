@@ -14,6 +14,7 @@ local Window = Rayfield:CreateWindow({
 -- Tabs
 local TeleportTab = Window:CreateTab("Teleport", 4483362458)
 local PlayerTab = Window:CreateTab("Players", 4483362458)
+local PerformanceTab = Window:CreateTab("Performance", 4483362458)
 
 -- Notification helper (bottom-right)
 local function notifyBottomRight(text, duration)
@@ -186,6 +187,9 @@ local NormalLighting = {
     GlobalShadows = game.Lighting.GlobalShadows
 }
 
+local Lighting = game:GetService("Lighting")
+local Terrain = workspace:FindFirstChildOfClass("Terrain")
+
 local STATE = {
     Godmode = false,
     GodConnection = nil,
@@ -196,6 +200,19 @@ local STATE = {
     SpeedApplied = false,
     HideNick = false,
     OriginalNick = nil
+}
+
+-- State & penyimpanan nilai asli agar bisa di-restore
+local PerfState = {
+    BoosterOn = false,
+    FpsCap = nil,
+    saved = {
+        lighting = nil,           -- tabel
+        postEffects = {},         -- {inst=postEffectInstance, enabled=bool}
+        terrain = nil,            -- tabel
+        particles = {},           -- {inst=emitter/trail/smoke/fire, enabled/rate}
+        meshFidelity = {},        -- {inst=MeshPart, rf=Enum.RenderFidelity}
+    }
 }
 
 -- store connections so toggles stay persistent
@@ -486,6 +503,184 @@ local function setHideNickname(on)
     end
 end
 
+local function captureLighting()
+    return {
+        Brightness = Lighting.Brightness,
+        ClockTime = Lighting.ClockTime,
+        FogEnd = Lighting.FogEnd,
+        Ambient = Lighting.Ambient,
+        OutdoorAmbient = Lighting.OutdoorAmbient,
+        GlobalShadows = Lighting.GlobalShadows,
+        ShadowSoftness = (pcall(function() return Lighting.ShadowSoftness end) and Lighting.ShadowSoftness) or nil,
+        EnvironmentDiffuseScale = (pcall(function() return Lighting.EnvironmentDiffuseScale end) and Lighting.EnvironmentDiffuseScale) or nil,
+        EnvironmentSpecularScale = (pcall(function() return Lighting.EnvironmentSpecularScale end) and Lighting.EnvironmentSpecularScale) or nil,
+        ExposureCompensation = (pcall(function() return Lighting.ExposureCompensation end) and Lighting.ExposureCompensation) or nil,
+    }
+end
+
+local function restoreLighting(saved)
+    if not saved then return end
+    Lighting.Brightness = saved.Brightness
+    Lighting.ClockTime = saved.ClockTime
+    Lighting.FogEnd = saved.FogEnd
+    Lighting.Ambient = saved.Ambient
+    Lighting.OutdoorAmbient = saved.OutdoorAmbient
+    Lighting.GlobalShadows = saved.GlobalShadows
+    if saved.ShadowSoftness ~= nil then Lighting.ShadowSoftness = saved.ShadowSoftness end
+    if saved.EnvironmentDiffuseScale ~= nil then Lighting.EnvironmentDiffuseScale = saved.EnvironmentDiffuseScale end
+    if saved.EnvironmentSpecularScale ~= nil then Lighting.EnvironmentSpecularScale = saved.EnvironmentSpecularScale end
+    if saved.ExposureCompensation ~= nil then Lighting.ExposureCompensation = saved.ExposureCompensation end
+end
+
+local function captureTerrain()
+    if not Terrain then return nil end
+    return {
+        Decoration = Terrain.Decoration,
+        WaterWaveSize = Terrain.WaterWaveSize,
+        WaterWaveSpeed = Terrain.WaterWaveSpeed,
+        WaterReflectance = Terrain.WaterReflectance,
+        WaterTransparency = Terrain.WaterTransparency,
+    }
+end
+
+local function restoreTerrain(saved)
+    if not Terrain or not saved then return end
+    Terrain.Decoration = saved.Decoration
+    Terrain.WaterWaveSize = saved.WaterWaveSize
+    Terrain.WaterWaveSpeed = saved.WaterWaveSpeed
+    Terrain.WaterReflectance = saved.WaterReflectance
+    Terrain.WaterTransparency = saved.WaterTransparency
+end
+
+local function disablePostEffects()
+    -- Matikan Bloom, SunRays, DOF, ColorCorrection, dll
+    local classes = {
+        "BloomEffect","ColorCorrectionEffect","DepthOfFieldEffect",
+        "SunRaysEffect","BlurEffect","Atmosphere"
+    }
+    for _, inst in ipairs(Lighting:GetChildren()) do
+        for _, cn in ipairs(classes) do
+            if inst:IsA(cn) then
+                table.insert(PerfState.saved.postEffects, {inst = inst, enabled = inst.Enabled ~= nil and inst.Enabled or true})
+                if inst.Enabled ~= nil then inst.Enabled = false end
+                if inst:IsA("Atmosphere") then
+                    -- Atmosphere nggak punya Enabled; bisa dikurangi intensitasnya
+                    pcall(function()
+                        inst.Density = 0
+                        inst.Offset = 0
+                        inst.Glare = 0
+                        inst.Haze = 0
+                    end)
+                end
+            end
+        end
+    end
+end
+
+local function restorePostEffects()
+    for _, info in ipairs(PerfState.saved.postEffects) do
+        if info.inst and info.inst.Parent then
+            if info.inst.Enabled ~= nil then
+                info.inst.Enabled = info.enabled
+            end
+        end
+    end
+    PerfState.saved.postEffects = {}
+end
+
+local function downscaleTerrain()
+    if not Terrain then return end
+    Terrain.Decoration = false
+    Terrain.WaterWaveSize = 0
+    Terrain.WaterWaveSpeed = 0
+    Terrain.WaterReflectance = 0
+    Terrain.WaterTransparency = 1
+end
+
+local function calmParticlesAndTrails()
+    -- Matikan emitter, trail, smoke, fire
+    for _, d in ipairs(workspace:GetDescendants()) do
+        if d:IsA("ParticleEmitter") then
+            table.insert(PerfState.saved.particles, {inst=d, enabled=d.Enabled, rate=d.Rate})
+            d.Enabled = false
+            d.Rate = 0
+        elseif d:IsA("Trail") then
+            table.insert(PerfState.saved.particles, {inst=d, enabled=d.Enabled})
+            d.Enabled = false
+        elseif d:IsA("Smoke") or d:IsA("Fire") then
+            table.insert(PerfState.saved.particles, {inst=d, enabled=d.Enabled})
+            d.Enabled = false
+        elseif d:IsA("MeshPart") then
+            -- Turunkan kualitas render fidelity
+            table.insert(PerfState.saved.meshFidelity, {inst=d, rf=d.RenderFidelity})
+            d.RenderFidelity = Enum.RenderFidelity.Performance
+        end
+    end
+end
+
+local function restoreParticlesAndTrails()
+    for _, info in ipairs(PerfState.saved.particles) do
+        local inst = info.inst
+        if inst and inst.Parent then
+            if inst:IsA("ParticleEmitter") then
+                inst.Enabled = info.enabled
+                if info.rate ~= nil then inst.Rate = info.rate end
+            elseif inst:IsA("Trail") or inst:IsA("Smoke") or inst:IsA("Fire") then
+                inst.Enabled = info.enabled
+            end
+        end
+    end
+    PerfState.saved.particles = {}
+
+    for _, info in ipairs(PerfState.saved.meshFidelity) do
+        local inst = info.inst
+        if inst and inst.Parent then
+            pcall(function() inst.RenderFidelity = info.rf end)
+        end
+    end
+    PerfState.saved.meshFidelity = {}
+end
+
+local function applyFPSBooster()
+    if PerfState.BoosterOn then return end
+    PerfState.BoosterOn = true
+
+    -- simpan kondisi awal
+    if not PerfState.saved.lighting then PerfState.saved.lighting = captureLighting() end
+    if not PerfState.saved.terrain then PerfState.saved.terrain = captureTerrain() end
+
+    -- lighting “murah”
+    Lighting.GlobalShadows = false
+    Lighting.Brightness = 1
+    Lighting.FogEnd = 800
+    pcall(function()
+        Lighting.EnvironmentDiffuseScale = 0
+        Lighting.EnvironmentSpecularScale = 0
+        Lighting.ExposureCompensation = 0
+        if Lighting.ShadowSoftness then Lighting.ShadowSoftness = 0 end
+    end)
+
+    -- matikan efek, sederhana teren
+    disablePostEffects()
+    downscaleTerrain()
+    calmParticlesAndTrails()
+
+    notifyBottomRight("FPS Booster aktif", 2)
+end
+
+local function removeFPSBooster()
+    if not PerfState.BoosterOn then return end
+    PerfState.BoosterOn = false
+
+    -- kembalikan semua setting
+    restorePostEffects()
+    restoreParticlesAndTrails()
+    restoreTerrain(PerfState.saved.terrain)
+    restoreLighting(PerfState.saved.lighting)
+
+    notifyBottomRight("FPS Booster dinonaktifkan", 2)
+end
+
 -- Anti-AFK (unchanged)
 PlayerTab:CreateButton({
     Name = "Anti AFK",
@@ -585,6 +780,53 @@ PlayerTab:CreateToggle({
     CurrentValue = false,
     Callback = function(Value)
         setHideNickname(Value)
+    end,
+})
+
+-- Toggle utama FPS Booster
+PerformanceTab:CreateToggle({
+    Name = "FPS Booster",
+    CurrentValue = false,
+    Flag = "FPSBooster",
+    Callback = function(Value)
+        if Value then
+            applyFPSBooster()
+        else
+            removeFPSBooster()
+        end
+    end,
+})
+
+-- FPS Cap (butuh executor yang support setfpscap)
+PerformanceTab:CreateDropdown({
+    Name = "FPS Cap",
+    Options = {"30","60","120","240","Unlimited"},
+    CurrentOption = "60",
+    Callback = function(opt)
+        local cap = nil
+        if opt == "Unlimited" then
+            cap = 1000
+        else
+            cap = tonumber(opt)
+        end
+        PerfState.FpsCap = cap
+        local ok, err = pcall(function()
+            if setfpscap then setfpscap(cap) end
+        end)
+        if ok and setfpscap then
+            notifyBottomRight("FPS cap di-set ke "..tostring(cap), 2)
+        else
+            notifyBottomRight("Executor tidak mendukung setfpscap", 3)
+        end
+    end,
+})
+
+-- Tombol bersih-bersih effect sekali jalan (opsional)
+PerformanceTab:CreateButton({
+    Name = "Clear Particles/Trails (Sekali)",
+    Callback = function()
+        calmParticlesAndTrails()
+        notifyBottomRight("Particles/Trails dimatikan (sekali). Gunakan toggle untuk restore.", 3)
     end,
 })
 
