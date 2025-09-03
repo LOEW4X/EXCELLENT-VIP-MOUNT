@@ -126,6 +126,44 @@ TeleportTab:CreateToggle({
     end,
 })
 
+-- =========================
+-- Teleport Mount Hilih (Auto)
+local HilihEnabled = false
+local HilihPoints = {
+    CFrame.new(-911, 23, -722),   -- Basecamp
+    CFrame.new(453, 16, -606),    -- Checkpoint 1
+    CFrame.new(-206, 48, -125),   -- Checkpoint 2
+    CFrame.new(-843, 34, -86),    -- Checkpoint 3
+    CFrame.new(-713, 401, 389),   -- Checkpoint 4
+    CFrame.new(-340, 150, 222),   -- Checkpoint 5
+    CFrame.new(-377, 362, 462),   -- Checkpoint 6
+    CFrame.new(-73, 336, 246),    -- Checkpoint 7
+    CFrame.new(245, 529, 172)     -- Puncak
+}
+
+TeleportTab:CreateToggle({
+    Name = "Mount Hilih",
+    CurrentValue = false,
+    Flag = "MountHilihTP",
+    Callback = function(Value)
+        HilihEnabled = Value
+        task.spawn(function()
+            while HilihEnabled do
+                for _, point in ipairs(HilihPoints) do
+                    if not HilihEnabled then break end
+                    pcall(function()
+                        local plr = game.Players.LocalPlayer
+                        if plr and plr.Character then
+                            plr.Character:PivotTo(point)
+                        end
+                    end)
+                    task.wait(1) -- delay antar titik 5 detik
+                end
+            end
+        end)
+    end,
+})
+
 -- Player features state & helpers
 local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
