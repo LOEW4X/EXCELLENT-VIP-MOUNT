@@ -1006,38 +1006,32 @@ PlayerTab:CreateButton({
     end,
 })
 
--- Dropdown Teleport Player
-local tpDropdown = PlayerTab:CreateDropdown({
-    Name = "Teleport to Player",
-    Options = {},
-    CurrentOption = {},
-    Flag = "TPToPlayer",
-    Callback = function(Option)
-        local targetName = Option[1]
-        local lp = game.Players.LocalPlayer
-        local target = game.Players:FindFirstChild(targetName)
-        if target and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
-            if lp.Character and lp.Character:FindFirstChild("HumanoidRootPart") then
-                lp.Character.HumanoidRootPart.CFrame =
-                    target.Character.HumanoidRootPart.CFrame + Vector3.new(0,3,0)
-                if notifyBottomRight then notifyBottomRight("Teleport ke " .. targetName, 2) end
-            end
-        end
+-- === TELEPORT TO PLAYER ===
+local targetName = nil
+
+PlayerTab:CreateInput({
+    Name = "Nama Player",
+    PlaceholderText = "Ketik nama pemain",
+    RemoveTextAfterFocusLost = false,
+    Callback = function(Text)
+        targetName = Text
+        notifyBottomRight("Target player: " .. tostring(Text), 2)
     end,
 })
 
--- updater isi player
-task.spawn(function()
-    while task.wait(3) do
-        local options = {}
-        for _, p in ipairs(game.Players:GetPlayers()) do
-            if p ~= game.Players.LocalPlayer then
-                table.insert(options, p.Name)
-            end
+PlayerTab:CreateButton({
+    Name = "Teleport ke Player",
+    Callback = function()
+        local lp = game.Players.LocalPlayer
+        local target = game.Players:FindFirstChild(targetName or "")
+        if lp and lp.Character and lp.Character:FindFirstChild("HumanoidRootPart") and target and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
+            lp.Character:PivotTo(target.Character.HumanoidRootPart.CFrame + Vector3.new(2,0,2))
+            notifyBottomRight("Teleport ke " .. target.Name, 2)
+        else
+            notifyBottomRight("Player tidak ditemukan atau belum spawn", 3)
         end
-        tpDropdown:Set(options)
-    end
-end)
+    end,
+})
 
 -- Toggle utama FPS Booster
 PerformanceTab:CreateToggle({
