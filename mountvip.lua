@@ -897,24 +897,40 @@ PerformanceTab:CreateButton({
     end,
 })
 
--- Dropdown pilihan weather
-WeatherTab:CreateDropdown({
-    Name = "Pilih Cuaca",
-    Options = {"Pagi", "Senja", "Malam", "Hujan"},
-    CurrentOption = "Pagi",
-    Flag = "WeatherSelect",
-    Callback = function(Option)
-        setWeather(Option)
+WeatherTab:CreateButton({
+    Name = "Pagi",
+    Callback = function()
+        setWeather("Morning")
     end,
 })
 
--- Tombol restore default
 WeatherTab:CreateButton({
-    Name = "Restore Default",
+    Name = "Matahari Terbenam",
     Callback = function()
-        restoreDefaultWeather()
+        setWeather("Sunset")
     end,
-})    
+})
+
+WeatherTab:CreateButton({
+    Name = "Malam",
+    Callback = function()
+        setWeather("Night")
+    end,
+})
+
+WeatherTab:CreateButton({
+    Name = "Hujan",
+    Callback = function()
+        setWeather("Rain")
+    end,
+})
+
+WeatherTab:CreateButton({
+    Name = "Kembalikan Default",
+    Callback = function()
+        setWeather("Default")
+    end,
+})
 
 -- Bypass basic anti-teleport (keep HumanoidRootPart unanchored)
 task.spawn(function()
