@@ -850,6 +850,50 @@ PlayerTab:CreateToggle({
     end,
 })
 
+-- X-Ray Feature
+local XRAY_TRANSPARENCY = 0.5
+local XRAY_ENABLED = false
+
+PlayerTab:CreateToggle({
+    Name = "X-Ray",
+    CurrentValue = false,
+    Callback = function(Value)
+        XRAY_ENABLED = Value
+        if XRAY_ENABLED then
+            for _, obj in ipairs(workspace:GetDescendants()) do
+                if obj:IsA("BasePart") and not obj:IsDescendantOf(game.Players.LocalPlayer.Character) then
+                    obj.LocalTransparencyModifier = XRAY_TRANSPARENCY
+                end
+            end
+            if notifyBottomRight then notifyBottomRight("X-Ray aktif", 2) end
+        else
+            for _, obj in ipairs(workspace:GetDescendants()) do
+                if obj:IsA("BasePart") and not obj:IsDescendantOf(game.Players.LocalPlayer.Character) then
+                    obj.LocalTransparencyModifier = 0
+                end
+            end
+            if notifyBottomRight then notifyBottomRight("X-Ray non-aktif", 2) end
+        end
+    end,
+})
+
+PlayerTab:CreateSlider({
+    Name = "X-Ray Transparency",
+    Range = {0.1, 1}, -- 0.1 = nyaris solid, 1 = full hilang
+    Increment = 0.1,
+    CurrentValue = XRAY_TRANSPARENCY,
+    Callback = function(Value)
+        XRAY_TRANSPARENCY = Value
+        if XRAY_ENABLED then
+            for _, obj in ipairs(workspace:GetDescendants()) do
+                if obj:IsA("BasePart") and not obj:IsDescendantOf(game.Players.LocalPlayer.Character) then
+                    obj.LocalTransparencyModifier = XRAY_TRANSPARENCY
+                end
+            end
+        end
+    end,
+})
+
 -- Toggle utama FPS Booster
 PerformanceTab:CreateToggle({
     Name = "FPS Booster",
