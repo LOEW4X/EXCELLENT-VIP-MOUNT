@@ -137,7 +137,7 @@ local TeleportPoints_Hilih = {
     CFrame.new(-341, 150, 216),  -- Checkpoint 5
     CFrame.new(-371, 363, 463),  -- Checkpoint 6
     CFrame.new(-70, 337, 241),   -- Checkpoint 7
-    CFrame.new(245, 529, 172)    -- Puncak
+    CFrame.new(254, 529, 140)    -- Puncak
 }
 
 TeleportTab:CreateToggle({
