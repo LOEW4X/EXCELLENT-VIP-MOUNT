@@ -951,7 +951,7 @@ UtilityTab:CreateSlider({
 local autoJumpConn = nil
 local AUTO_JUMP = false
 
-PlayerTab:CreateToggle({
+UtilityTab:CreateToggle({
     Name = "Auto Jump (Bunny Hop)",
     CurrentValue = false,
     Callback = function(Value)
