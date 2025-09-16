@@ -233,7 +233,7 @@ local TeleportPoints_Sakahayang = {
 }
 
 TeleportTab:CreateToggle({
-    Name = "Mount Sakahayang (Auto Loop)",
+    Name = "Mount Sakahayang",
     CurrentValue = false,
     Flag = "MountSakahayangTP",
     Callback = function(Value)
@@ -251,9 +251,9 @@ TeleportTab:CreateToggle({
 
                     -- Delay khusus untuk Checkpoint 1
                     if i == 2 then
-                        task.wait(5) -- waktu untuk pilih mode manual
+                        task.wait(3) -- waktu untuk pilih mode manual
                     else
-                        task.wait(1) -- delay normal antar titik
+                        task.wait(2) -- delay normal antar titik
                     end
                 end
             end
