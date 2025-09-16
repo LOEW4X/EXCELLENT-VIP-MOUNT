@@ -224,6 +224,43 @@ TeleportTab:CreateToggle({
     end,
 })
 
+-- Teleport (Mount Sakahayang)
+local TeleportEnabled_Sakahayang = false
+local TeleportPoints_Sakahayang = {
+    CFrame.new(777, 56, 651),    -- Basecamp
+    CFrame.new(650, 55, 586),    -- Checkpoint 1
+    CFrame.new(-957, 3146, 529)  -- Puncak
+}
+
+TeleportTab:CreateToggle({
+    Name = "Mount Sakahayang (Auto Loop)",
+    CurrentValue = false,
+    Flag = "MountSakahayangTP",
+    Callback = function(Value)
+        TeleportEnabled_Sakahayang = Value
+        task.spawn(function()
+            while TeleportEnabled_Sakahayang do
+                for i, point in ipairs(TeleportPoints_Sakahayang) do
+                    if not TeleportEnabled_Sakahayang then break end
+                    pcall(function()
+                        local plr = game.Players.LocalPlayer
+                        if plr and plr.Character then
+                            plr.Character:PivotTo(point)
+                        end
+                    end)
+
+                    -- Delay khusus untuk Checkpoint 1
+                    if i == 2 then
+                        task.wait(5) -- waktu untuk pilih mode manual
+                    else
+                        task.wait(1) -- delay normal antar titik
+                    end
+                end
+            end
+        end)
+    end,
+})
+
 
 -- Player features state & helpers
 local Players = game:GetService("Players")
