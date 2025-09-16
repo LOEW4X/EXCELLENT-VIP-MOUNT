@@ -233,7 +233,7 @@ local TeleportPoints_Sakahayang = {
 }
 
 TeleportTab:CreateToggle({
-    Name = "Mount Sakahayang (Auto Loop)",
+    Name = "Mount Sakahayang",
     CurrentValue = false,
     Flag = "MountSakahayangTP",
     Callback = function(Value)
