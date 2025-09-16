@@ -233,7 +233,7 @@ local TeleportPoints_Sakahayang = {
 }
 
 TeleportTab:CreateToggle({
-    Name = "Mount Sakahayang",
+    Name = "Mount Sakahayang (Auto Loop)",
     CurrentValue = false,
     Flag = "MountSakahayangTP",
     Callback = function(Value)
@@ -249,11 +249,20 @@ TeleportTab:CreateToggle({
                         end
                     end)
 
-                    -- Delay khusus untuk Checkpoint 1
+                    -- Delay khusus Checkpoint 1
                     if i == 2 then
-                        task.wait(3) -- waktu untuk pilih mode manual
+                        task.wait(3) -- beri waktu pilih mode manual
                     else
-                        task.wait(2) -- delay normal antar titik
+                        task.wait(1)
+                    end
+
+                    -- Auto mati saat sampai Puncak
+                    if i == #TeleportPoints_Sakahayang then
+                        local plr = game.Players.LocalPlayer
+                        if plr and plr.Character and plr.Character:FindFirstChildOfClass("Humanoid") then
+                            plr.Character:FindFirstChildOfClass("Humanoid").Health = 0
+                        end
+                        task.wait(5) -- jeda biar respawn dulu
                     end
                 end
             end
