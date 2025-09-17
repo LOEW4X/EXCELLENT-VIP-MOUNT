@@ -315,45 +315,6 @@ TeleportTab:CreateToggle({
     end,
 })
 
--- Teleport (Mount Atin)
-local TeleportEnabled_Atin = false
-local TeleportPoints_Atin = {
-    CFrame.new(16, 57, -1083),    -- Basecamp
-    CFrame.new(624, 1801, 3432),    -- Checkpoint 1
-    CFrame.new(791, 2176, 3940)  -- Puncak
-}
-
-TeleportTab:CreateToggle({
-    Name = "Mount Atin",
-    CurrentValue = false,
-    Flag = "MountAtinTP",
-    Callback = function(Value)
-        TeleportEnabled_Atin = Value
-        task.spawn(function()
-            while TeleportEnabled_Atin do
-                for i, point in ipairs(TeleportPoints_Atin) do
-                    if not TeleportEnabled_Atin then break end
-                    pcall(function()
-                        local plr = game.Players.LocalPlayer
-                        if plr and plr.Character then
-                            plr.Character:PivotTo(point)
-                        end
-                    end)
-
-                    task.wait(1)
-
-                                        -- Auto Rejoin saat sampai Puncak
-                    if i == #TeleportPoints_Atin then
-                        local lp = Players.LocalPlayer
-                        TeleportService:Teleport(game.PlaceId, lp)
-                        task.wait(5) -- kasih jeda biar tidak spam
-                    end
-                end
-            end
-        end)
-    end,
-})
-
 
 -- Player features state & helpers
 local Players = game:GetService("Players")
