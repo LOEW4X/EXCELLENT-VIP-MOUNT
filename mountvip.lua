@@ -299,7 +299,7 @@ TeleportTab:CreateToggle({
                     if i == 3 then
                         task.wait(3) -- beri waktu pilih mode manual
                     else
-                        task.wait(1)
+                        task.wait(3)
                     end
                 end
             end
