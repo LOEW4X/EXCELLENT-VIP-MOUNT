@@ -315,7 +315,6 @@ TeleportTab:CreateToggle({
     end,
 })
 
-
 -- Teleport (Mount Kawah Terjun)
 local TeleportEnabled_KawahTerjun = false
 local TeleportPoints_KawahTerjun = {
@@ -341,9 +340,14 @@ TeleportTab:CreateToggle({
                         end
                     end)
 
-                    -- Delay khusus tiap titik
+                    -- Delay & Auto Dead logic
                     if i == 1 then
-                        task.wait(5) -- Basecamp
+                        -- Basecamp → auto dead
+                        local plr = game.Players.LocalPlayer
+                        if plr and plr.Character and plr.Character:FindFirstChildOfClass("Humanoid") then
+                            plr.Character:FindFirstChildOfClass("Humanoid").Health = 0
+                        end
+                        task.wait(5) -- durasi mati/respawn sebelum lanjut
                     elseif i == 2 then
                         task.wait(2) -- Checkpoint 1
                     elseif i == 3 then
