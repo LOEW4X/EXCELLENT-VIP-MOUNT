@@ -315,12 +315,15 @@ TeleportTab:CreateToggle({
     end,
 })
 
--- Teleport (Mount Kawah Terjun) - Manual Dropdown
+-- Teleport (Mount Kawah Terjun)
 local TeleportPoints_KawahTerjun = {
-    ["Basecamp"]    = CFrame.new(292, -38, 10),
+    ["Basecamp"]     = CFrame.new(292, -38, 10),
     ["Checkpoint 1"] = CFrame.new(-36, -145, 463),
-    ["Puncak"]      = CFrame.new(82, -233, 213)
+    ["Puncak"]       = CFrame.new(82, -233, 213)
 }
+
+-- simpan pilihan terakhir
+local selectedKawah = "Basecamp"
 
 TeleportTab:CreateDropdown({
     Name = "Mount Kawah Terjun",
@@ -328,9 +331,35 @@ TeleportTab:CreateDropdown({
     CurrentOption = "Basecamp",
     Flag = "MountKawahTerjunDropdown",
     Callback = function(Option)
-        local plr = game.Players.LocalPlayer
-        if plr and plr.Character and TeleportPoints_KawahTerjun[Option] then
-            plr.Character:PivotTo(TeleportPoints_KawahTerjun[Option])
+        -- beberapa versi Rayfield kirim string, ada juga table
+        if type(Option) == "table" then
+            selectedKawah = Option[1] or selectedKawah
+        else
+            selectedKawah = Option or selectedKawah
+        end
+        print("[KawahTerjun] Selected:", selectedKawah)
+    end,
+})
+
+
+TeleportTab:CreateButton({
+    Name = "Apply TP (Kawah Terjun)",
+    Callback = function()
+        local cf = TeleportPoints_KawahTerjun[selectedKawah]
+        if cf then
+            local plr = game.Players.LocalPlayer
+            if plr and plr.Character then
+                pcall(function()
+                    plr.Character:PivotTo(cf)
+                end)
+                if notifyBottomRight then
+                    notifyBottomRight("Teleport ke "..selectedKawah, 2)
+                end
+            end
+        else
+            if notifyBottomRight then
+                notifyBottomRight("Pilihan tidak valid!", 2)
+            end
         end
     end,
 })
