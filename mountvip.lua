@@ -342,13 +342,11 @@ TeleportTab:CreateToggle({
 
                     task.wait(1)
 
-                    -- Auto mati saat sampai Puncak
+                                        -- Auto Rejoin saat sampai Puncak
                     if i == #TeleportPoints_Atin then
-                        local plr = game.Players.LocalPlayer
-                        if plr and plr.Character and plr.Character:FindFirstChildOfClass("Humanoid") then
-                            plr.Character:FindFirstChildOfClass("Humanoid").Health = 0
-                        end
-                        task.wait(5) -- jeda biar respawn dulu
+                        local lp = Players.LocalPlayer
+                        TeleportService:Teleport(game.PlaceId, lp)
+                        task.wait(5) -- kasih jeda biar tidak spam
                     end
                 end
             end
