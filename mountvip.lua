@@ -315,49 +315,23 @@ TeleportTab:CreateToggle({
     end,
 })
 
--- Teleport (Mount Kawah Terjun)
-local TeleportEnabled_KawahTerjun = false
+-- Teleport (Mount Kawah Terjun) - Manual Dropdown
 local TeleportPoints_KawahTerjun = {
-    CFrame.new(292, -38, 10),     -- Basecamp
-    CFrame.new(-36, -145, 463),   -- Checkpoint 1
-    CFrame.new(82, -233, 213)     -- Puncak
+    ["Basecamp"]    = CFrame.new(292, -38, 10),
+    ["Checkpoint 1"] = CFrame.new(-36, -145, 463),
+    ["Puncak"]      = CFrame.new(82, -233, 213)
 }
 
-TeleportTab:CreateToggle({
+TeleportTab:CreateDropdown({
     Name = "Mount Kawah Terjun",
-    CurrentValue = false,
-    Flag = "MountKawahTerjunTP",
-    Callback = function(Value)
-        TeleportEnabled_KawahTerjun = Value
-        task.spawn(function()
-            while TeleportEnabled_KawahTerjun do
-                for i, point in ipairs(TeleportPoints_KawahTerjun) do
-                    if not TeleportEnabled_KawahTerjun then break end
-                    pcall(function()
-                        local plr = game.Players.LocalPlayer
-                        if plr and plr.Character then
-                            plr.Character:PivotTo(point)
-                        end
-                    end)
-
-                    -- Delay & Auto Dead logic
-                    if i == 1 then
-                        -- Basecamp → auto dead
-                        local plr = game.Players.LocalPlayer
-                        if plr and plr.Character and plr.Character:FindFirstChildOfClass("Humanoid") then
-                            plr.Character:FindFirstChildOfClass("Humanoid").Health = 0
-                        end
-                        task.wait(5) -- durasi mati/respawn sebelum lanjut
-                    elseif i == 2 then
-                        task.wait(2) -- Checkpoint 1
-                    elseif i == 3 then
-                        task.wait(3) -- Puncak
-                    else
-                        task.wait(1) -- fallback
-                    end
-                end
-            end
-        end)
+    Options = {"Basecamp", "Checkpoint 1", "Puncak"},
+    CurrentOption = "Basecamp",
+    Flag = "MountKawahTerjunDropdown",
+    Callback = function(Option)
+        local plr = game.Players.LocalPlayer
+        if plr and plr.Character and TeleportPoints_KawahTerjun[Option] then
+            plr.Character:PivotTo(TeleportPoints_KawahTerjun[Option])
+        end
     end,
 })
 
