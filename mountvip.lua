@@ -271,6 +271,50 @@ TeleportTab:CreateToggle({
 })
 
 
+local TeleportEnabled_Galunggung = false
+local TeleportPoints_Galunggung = {
+    CFrame.new(-25, 6, -47),  -- Basecamp
+    CFrame.new(-715, 178, 411),   -- Checkpoint 1
+    CFrame.new(-928, 169, 101),  -- Checkpoint 2
+    CFrame.new(-1240, 152, -56),   -- Checkpoint 3
+    CFrame.new(-1355, 167, -824),  -- Checkpoint 4
+    CFrame.new(-1317, 230, -994),  -- Checkpoint 5
+    CFrame.new(-1360, 375, -1492),  -- Checkpoint 6
+    CFrame.new(-1323, 259, -2256),   -- Checkpoint 7
+    CFrame.new(-1240, 225, -2650),   -- Checkpoint 8
+    CFrame.new(-1242, 471, -3389)    -- Puncak
+}
+
+TeleportTab:CreateToggle({
+    Name = "Mount Galunggung",
+    CurrentValue = false,
+    Flag = "MountGalunggungTP",
+    Callback = function(Value)
+        TeleportEnabled_Galunggung = Value
+        task.spawn(function()
+            while TeleportEnabled_Galunggung do
+                for i, point in ipairs(TeleportPoints_Galunggung) do
+                    if not TeleportEnabled_Galunggung then break end
+                    pcall(function()
+                        local plr = game.Players.LocalPlayer
+                        if plr and plr.Character then
+                            plr.Character:PivotTo(point)
+                        end
+                    end)
+
+                    -- Delay default 5 detik antar checkpoint
+                    task.wait(1)
+
+                    -- Kalau sudah sampai Puncak (titik terakhir), tambahin delay ekstra
+                    if i == #TeleportPoints_Galunggung then
+                        task.wait(2) -- delay tambahan khusus Puncak
+                    end
+                end
+            end
+        end)
+    end,
+})
+
 -- Player features state & helpers
 local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
