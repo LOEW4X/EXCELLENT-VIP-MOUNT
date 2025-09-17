@@ -297,7 +297,7 @@ TeleportTab:CreateToggle({
 
                     -- Delay khusus Checkpoint 1
                     if i == 3 then
-                        task.wait(3) -- beri waktu pilih mode manual
+                        task.wait(7) -- beri waktu pilih mode manual
                     else
                         task.wait(3)
                     end
