@@ -63,11 +63,11 @@ local Window = Rayfield:CreateWindow({
 })
 
 -- Tabs
-local TeleportTab = Window:CreateTab("Teleport", 4483362458)
-local PlayerTab = Window:CreateTab("Players", 4483362458)
+local TeleportTab = Window:CreateTab("Teleport", 🔁)
+local PlayerTab = Window:CreateTab("Players", 🚹)
 local UtilityTab = Window:CreateTab("Utility", 4483362458)
-local PerformanceTab = Window:CreateTab("Performance", 4483362458)
-local WeatherTab = Window:CreateTab("Weather", 4483362458)
+local PerformanceTab = Window:CreateTab("Performance", 🎮)
+local WeatherTab = Window:CreateTab("Weather", ⛅)
 
 -- Notification helper (bottom-right)
 local function notifyBottomRight(text, duration)
