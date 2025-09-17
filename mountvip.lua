@@ -270,6 +270,43 @@ TeleportTab:CreateToggle({
     end,
 })
 
+-- Teleport (Mount Kawah Terjun)
+local TeleportEnabled_KawahTerjun = false
+local TeleportPoints_KawahTerjun = {
+    CFrame.new(292, -38, 10),     -- Basecamp
+    CFrame.new(-36, -145, 463),   -- Checkpoint 1
+    CFrame.new(82, -233, 213)     -- Puncak
+}
+
+TeleportTab:CreateToggle({
+    Name = "Mount Kawah Terjun",
+    CurrentValue = false,
+    Flag = "MountKawahTerjunTP",
+    Callback = function(Value)
+        TeleportEnabled_KawahTerjun = Value
+        task.spawn(function()
+            while TeleportEnabled_KawahTerjun do
+                for i, point in ipairs(TeleportPoints_KawahTerjun) do
+                    if not TeleportEnabled_KawahTerjun then break end
+                    pcall(function()
+                        local plr = game.Players.LocalPlayer
+                        if plr and plr.Character then
+                            plr.Character:PivotTo(point)
+                        end
+                    end)
+
+                    -- Delay khusus Checkpoint 1
+                    if i == 3 then
+                        task.wait(3) -- beri waktu pilih mode manual
+                    else
+                        task.wait(1)
+                    end
+                end
+            end
+        end)
+    end,
+})
+
 
 local TeleportEnabled_Galunggung = false
 local TeleportPoints_Galunggung = {
