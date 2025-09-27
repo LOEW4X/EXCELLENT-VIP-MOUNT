@@ -965,16 +965,16 @@ PlayerTab:CreateToggle({
 
 --apply speedhack
 PlayerTab:CreateInput({
-    Name = "WalkSpeed (16–200)",
+    Name = "WalkSpeed (16-500)",
     PlaceholderText = "Enter WalkSpeed",
     RemoveTextAfterFocusLost = true,
     Callback = function(Text)
         local speed = tonumber(Text)
-        if speed and speed >= 16 and speed <= 200 then
+        if speed and speed >= 16 and speed <= 500 then
             STATE.SpeedDesired = speed
             notifyBottomRight("Speed yang dipilih: " .. tostring(speed), 2)
         else
-            notifyBottomRight("Masukkan nilai antara 16 sampai 200", 3)
+            notifyBottomRight("Masukkan nilai antara 16 sampai 500", 3)
         end
     end,
 })
